@@ -20,7 +20,7 @@ class PawPalSystemTests(unittest.TestCase):
         self.pet = Pet(
             pet_id="pet_001",
             owner_id="owner_001",
-            name="Buddy",
+            name="Mochi",
             species="dog",
             age_years=3,
         )
@@ -35,7 +35,7 @@ class PawPalSystemTests(unittest.TestCase):
             )
 
             kb = PetHealthKnowledgeBase(file_path=str(kb_path))
-            matches = kb.search("Buddy has lethargy today")
+            matches = kb.search("Mochi has lethargy today")
 
             self.assertIn("lethargy", matches)
             self.assertEqual(matches["lethargy"], "Low energy can signal illness.")
@@ -60,7 +60,7 @@ class PawPalSystemTests(unittest.TestCase):
                     {
                         "type": "add_task",
                         "reason": "The symptom is serious enough to warrant a vet check.",
-                        "pet_name": "Buddy",
+                        "pet_name": "Mochi",
                         "task": {
                             "description": "Schedule Vet Visit",
                             "category": "health",
@@ -75,7 +75,7 @@ class PawPalSystemTests(unittest.TestCase):
         )
 
         system = PetCareSystem(self.owner, llm_client=StubLLMClient(plan))
-        response = system.coordinate_pet_care("Buddy has been lethargic")
+        response = system.coordinate_pet_care("Mochi has been lethargic")
 
         self.assertIn("Guideline cited:", response)
         self.assertIn("Schedule Vet Visit", response)
@@ -90,7 +90,7 @@ class PawPalSystemTests(unittest.TestCase):
                 {
                     "type": "add_task",
                     "reason": "Alias-based symptom match should still trigger a task.",
-                    "pet_name": "Buddy",
+                    "pet_name": "Mochi",
                     "task": {
                         "description": "Schedule Vet Visit",
                         "category": "health",
@@ -116,7 +116,7 @@ class PawPalSystemTests(unittest.TestCase):
                 {
                     "type": "add_task",
                     "reason": "The uploaded record supports a follow-up.",
-                    "pet_name": "Buddy",
+                    "pet_name": "Mochi",
                     "task": {
                         "description": "Review discharge note",
                         "category": "health",
@@ -135,18 +135,18 @@ class PawPalSystemTests(unittest.TestCase):
             content="Recent discharge note: lethargy and poor appetite observed after treatment.",
         )
 
-        context = system.retrieve_hybrid_context("Buddy has been lethargic and has not eaten", self.pet)
+        context = system.retrieve_hybrid_context("Mochi has been lethargic and has not eaten", self.pet)
         self.assertIn("lethargy", context["retrieved_guidelines"])
         self.assertIn("record_001", context["medical_records"])
 
-        response = system.coordinate_pet_care("Buddy has been lethargic and has not eaten")
+        response = system.coordinate_pet_care("Mochi has been lethargic and has not eaten")
         self.assertIn("Guideline cited:", response)
         self.assertIn("Uploaded record cited:", response)
         self.assertIn("Review discharge note", response)
 
     def test_coordinate_pet_care_logs_malformed_plan(self) -> None:
         system = PetCareSystem(self.owner, llm_client=StubLLMClient("not-json"))
-        response = system.coordinate_pet_care("Buddy has been lethargic")
+        response = system.coordinate_pet_care("Mochi has been lethargic")
 
         self.assertIn("AI_PLANNING_FAILURE", response)
 
