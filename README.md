@@ -31,7 +31,9 @@ The system is organized as a unified pipeline that runs with a single call to `c
 6. **Response layer** explains the guideline and record evidence that were used, along with the actions taken.
 7. **Logging and guardrails** capture failures and malformed outputs in `system.log`.
 
-Architecture diagram source: [assets/system_architecture.mmd](assets/system_architecture.mmd)
+![PawPal+ architecture diagram](assets/mermaid-diagram-2026-04-29-020728.png)
+
+Architecture diagram source: [assets/mermaid-diagram-2026-04-29-020728.png](assets/mermaid-diagram-2026-04-29-020728.png)
 
 Supporting reflection artifact: [model_card.md](model_card.md)
 
