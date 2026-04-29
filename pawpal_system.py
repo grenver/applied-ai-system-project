@@ -477,46 +477,6 @@ class PetHealthKnowledgeBase:
         return matches
 
 
-class OpenAIPlanClient:
-    def __init__(self, model: str = "gpt-4o-mini") -> None:
-        self.model = model
-
-    @classmethod
-    def from_environment(cls) -> Optional["OpenAIPlanClient"]:
-        if not os.getenv("OPENAI_API_KEY"):
-            return None
-        try:
-            import openai  # type: ignore[import-not-found]
-        except ImportError:
-            return None
-        return cls(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
-
-    def generate_plan(self, user_input: str, context: dict[str, Any]) -> str:
-        from openai import OpenAI  # type: ignore[import-not-found]
-
-        client = OpenAI()
-        messages = [
-            {
-                "role": "system",
-                "content": (
-                    "You are a pet health planning agent. Return JSON only with keys "
-                    "intent, summary, and actions. Each action should include a type, "
-                    "reason, pet_name, and any execution fields."
-                ),
-            },
-            {
-                "role": "user",
-                "content": json.dumps({"user_input": user_input, "context": context}, indent=2),
-            },
-        ]
-        response = client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=0.2,
-        )
-        return response.choices[0].message.content or "{}"
-
-
 class GeminiPlanClient:
     def __init__(self, model: str = "gemini-2.5-flash-lite") -> None:
         self.model = model
@@ -633,15 +593,14 @@ class PetCareSystem:
         self.knowledge_base = knowledge_base or PetHealthKnowledgeBase()
         self.medical_records = MedicalRecordStore()
 
-        # Smart initialization: Gemini > OpenAI > RuleBasedPlanner
+        # Smart initialization: Gemini if available, otherwise rule-based fallback.
         if llm_client is not None:
             self.llm_client = llm_client
         elif os.getenv("GOOGLE_API_KEY"):
             gemini_client = GeminiPlanClient.from_environment()
             self.llm_client = gemini_client if gemini_client else RuleBasedPlanner()
         else:
-            openai_client = OpenAIPlanClient.from_environment()
-            self.llm_client = openai_client if openai_client else RuleBasedPlanner()
+            self.llm_client = RuleBasedPlanner()
 
     def add_task(self, task: Task) -> None:
         self.scheduler.add_task(task)
