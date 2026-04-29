@@ -7,7 +7,7 @@
   },
   {
     "name": "itching",
-    "input": "Buddy keeps scratching his skin at night",
+    "input": "Mochi keeps scratching his skin at night",
     "expected_guidelines": ["itching"],
     "expected_action": "add_task"
   },
@@ -19,7 +19,7 @@
   },
   {
     "name": "no_match",
-    "input": "Buddy seems a little off but I am not sure why",
+    "input": "Mochi seems a little off but I am not sure why",
     "expected_guidelines": [],
     "expected_action": "add_log"
   },
@@ -37,7 +37,7 @@
   },
   {
     "name": "coughing",
-    "input": "Buddy is coughing frequently and seems to have difficulty breathing",
+    "input": "Mochi is coughing frequently and seems to have difficulty breathing",
     "expected_guidelines": ["coughing"],
     "expected_action": "add_task"
   },
@@ -55,7 +55,7 @@
   },
   {
     "name": "multiple_symptoms",
-    "input": "Buddy has skin_infection with itching and is lethargic",
+    "input": "Mochi has skin_infection with itching and is lethargic",
     "expected_guidelines": ["itching", "skin_infection", "lethargy"],
     "expected_action": "add_task"
   },
@@ -79,7 +79,7 @@
   },
   {
     "name": "eye_issues",
-    "input": "Buddy has eye_discharge coming from his eyes",
+    "input": "Mochi has eye_discharge coming from his eyes",
     "expected_guidelines": ["eye_discharge"],
     "expected_action": "add_task"
   }
