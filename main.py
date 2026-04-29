@@ -184,7 +184,7 @@ def main():
 
     care_system = PetCareSystem(owner)
     response = care_system.coordinate_pet_care(
-        "Buddy has been lethargic and has not eaten in 12 hours"
+        "Mochi has been lethargic and has not eaten in 12 hours"
     )
     print(response)
 
