@@ -1,5 +1,17 @@
 {
   "lethargy": "Puppies with low energy may have low blood sugar or infection. Ensure they are hydrated.",
   "appetite": "Loss of appetite for more than 24 hours requires a veterinary consultation.",
-  "itching": "Frequent scratching often indicates fleas, mites, or seasonal allergies."
+  "itching": "Frequent scratching often indicates fleas, mites, or seasonal allergies.",
+  "vomiting": "Occasional vomiting may be dietary. Persistent vomiting with lethargy or loss of appetite requires immediate veterinary evaluation.",
+  "diarrhea": "Mild diarrhea may resolve with bland diet. If persistent for more than 2 days or accompanied by blood, seek veterinary care.",
+  "coughing": "Occasional coughing may be allergies or irritation. Persistent cough, especially with labored breathing, requires veterinary attention.",
+  "limping": "Sudden limping may indicate injury or pain. Check for swelling or heat in the limb. Lameness lasting more than a few hours needs assessment.",
+  "ear_infection": "Signs include excessive head shaking, ear odor, or discharge. Ear infections can worsen quickly and require veterinary treatment.",
+  "skin_infection": "Redness, rashes, or oozing sores may indicate infection. Keep area clean and dry. Veterinary evaluation recommended to prevent spread.",
+  "weight_loss": "Unintended weight loss combined with appetite changes warrants a veterinary check to rule out underlying conditions.",
+  "excessive_thirst": "Significantly increased water intake may indicate diabetes, kidney issues, or infection. Schedule a veterinary visit for evaluation.",
+  "behavioral_change": "Sudden changes in behavior such as aggression, anxiety, or withdrawal can signal pain or illness. Observe for other symptoms and contact your vet.",
+  "eye_discharge": "Clear or watery discharge may be minor. Thick, colored discharge or redness requires prompt veterinary examination.",
+  "sneezing": "Occasional sneezing is usually normal. Frequent sneezing with nasal discharge may indicate infection or allergies.",
+  "panting": "Excessive panting in cool conditions or at rest may indicate pain, anxiety, fever, or heart issues. Have your pet checked by a veterinarian."
 }
