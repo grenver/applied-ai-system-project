@@ -1,0 +1,86 @@
+[
+  {
+    "name": "lethargy_and_appetite",
+    "input": "Mochi has been lethargic and has not eaten in 12 hours",
+    "expected_guidelines": ["lethargy", "appetite"],
+    "expected_action": "add_task"
+  },
+  {
+    "name": "itching",
+    "input": "Buddy keeps scratching his skin at night",
+    "expected_guidelines": ["itching"],
+    "expected_action": "add_task"
+  },
+  {
+    "name": "direct_keyword",
+    "input": "My dog has appetite issues and is not eating",
+    "expected_guidelines": ["appetite"],
+    "expected_action": "add_task"
+  },
+  {
+    "name": "no_match",
+    "input": "Buddy seems a little off but I am not sure why",
+    "expected_guidelines": [],
+    "expected_action": "add_log"
+  },
+  {
+    "name": "vomiting",
+    "input": "Whiskers has been vomiting multiple times today",
+    "expected_guidelines": ["vomiting"],
+    "expected_action": "add_task"
+  },
+  {
+    "name": "diarrhea",
+    "input": "My pet has persistent diarrhea for 3 days",
+    "expected_guidelines": ["diarrhea"],
+    "expected_action": "add_task"
+  },
+  {
+    "name": "coughing",
+    "input": "Buddy is coughing frequently and seems to have difficulty breathing",
+    "expected_guidelines": ["coughing"],
+    "expected_action": "add_task"
+  },
+  {
+    "name": "limping",
+    "input": "My dog is limping on the back leg and seems to be in pain",
+    "expected_guidelines": ["limping"],
+    "expected_action": "add_task"
+  },
+  {
+    "name": "ear_infection",
+    "input": "Mochi has an ear_infection and keeps shaking his head",
+    "expected_guidelines": ["ear_infection"],
+    "expected_action": "add_task"
+  },
+  {
+    "name": "multiple_symptoms",
+    "input": "Buddy has skin_infection with itching and is lethargic",
+    "expected_guidelines": ["itching", "skin_infection", "lethargy"],
+    "expected_action": "add_task"
+  },
+  {
+    "name": "weight_loss",
+    "input": "I noticed my cat has weight_loss and has not eaten much",
+    "expected_guidelines": ["weight_loss", "appetite"],
+    "expected_action": "add_task"
+  },
+  {
+    "name": "excessive_thirst",
+    "input": "Whiskers is showing excessive_thirst and drinking lots of water",
+    "expected_guidelines": ["excessive_thirst"],
+    "expected_action": "add_task"
+  },
+  {
+    "name": "behavioral_change",
+    "input": "My dog has behavioral_change and won't play, very unusual",
+    "expected_guidelines": ["behavioral_change"],
+    "expected_action": "add_log"
+  },
+  {
+    "name": "eye_issues",
+    "input": "Buddy has eye_discharge coming from his eyes",
+    "expected_guidelines": ["eye_discharge"],
+    "expected_action": "add_task"
+  }
+]
