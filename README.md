@@ -59,7 +59,7 @@ streamlit run app.py
 ## Sample Interactions
 ### Example 1: Lethargy
 **Input:**
-`Buddy has been lethargic and has not eaten in 12 hours`
+`Mochi has been lethargic and has not eaten in 12 hours`
 
 **Expected behavior:**
 - Retrieves the lethargy guideline from `pet_health_data.json`
@@ -78,7 +78,7 @@ streamlit run app.py
 
 ### Example 3: No direct match
 **Input:**
-`Buddy seems uncomfortable but I am not sure why`
+`Mochi seems uncomfortable but I am not sure why`
 
 **Expected behavior:**
 - Handles the no-match edge case safely
