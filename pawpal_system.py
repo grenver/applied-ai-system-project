@@ -517,6 +517,48 @@ class OpenAIPlanClient:
         return response.choices[0].message.content or "{}"
 
 
+class GeminiPlanClient:
+    def __init__(self, model: str = "gemini-2.5-flash-lite") -> None:
+        self.model = model
+
+    @classmethod
+    def from_environment(cls) -> Optional["GeminiPlanClient"]:
+        if not os.getenv("GOOGLE_API_KEY"):
+            return None
+        try:
+            import google.genai  # type: ignore[import-not-found]
+        except ImportError:
+            return None
+        return cls(model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite"))
+
+    def generate_plan(self, user_input: str, context: dict[str, Any]) -> str:
+        import google.genai  # type: ignore[import-not-found]
+
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY not set")
+
+        client = google.genai.Client(api_key=api_key)
+
+        system_prompt = (
+            "You are a pet health planning agent. Return JSON only with keys "
+            "intent, summary, and actions. Each action should include a type, "
+            "reason, pet_name, and any execution fields."
+        )
+
+        user_message = json.dumps({"user_input": user_input, "context": context}, indent=2)
+
+        response = client.models.generate_content(
+            model=self.model,
+            contents=[
+                {"role": "user", "parts": [{"text": system_prompt + "\n\n" + user_message}]}
+            ],
+            config={"response_mime_type": "application/json", "temperature": 0.2},
+        )
+
+        return response.text or "{}"
+
+
 class RuleBasedPlanner:
     def generate_plan(self, user_input: str, context: dict[str, Any]) -> str:
         user_input = user_input.lower()
@@ -590,7 +632,16 @@ class PetCareSystem:
         self.scheduler = Scheduler(owner)
         self.knowledge_base = knowledge_base or PetHealthKnowledgeBase()
         self.medical_records = MedicalRecordStore()
-        self.llm_client = llm_client or OpenAIPlanClient.from_environment() or RuleBasedPlanner()
+
+        # Smart initialization: Gemini > OpenAI > RuleBasedPlanner
+        if llm_client is not None:
+            self.llm_client = llm_client
+        elif os.getenv("GOOGLE_API_KEY"):
+            gemini_client = GeminiPlanClient.from_environment()
+            self.llm_client = gemini_client if gemini_client else RuleBasedPlanner()
+        else:
+            openai_client = OpenAIPlanClient.from_environment()
+            self.llm_client = openai_client if openai_client else RuleBasedPlanner()
 
     def add_task(self, task: Task) -> None:
         self.scheduler.add_task(task)
@@ -659,67 +710,6 @@ class PetCareSystem:
             return RuleBasedPlanner().generate_plan(user_input, context)
 
         return self.llm_client.generate_plan(user_input=user_input, context=context)
-
-    def ask_gemini_for_plan(self, user_question: str) -> dict[str, Any]:
-        """Attempt to call Gemini (google-generativeai) with retrieved snippets.
-
-        Edge cases handled:
-        - If the KB has no matching snippets, include a short note and still query Gemini
-          asking for conservative next steps.
-        - If the `google.generativeai` package is missing or the call fails, return
-          a structured error and log `AI_PLANNING_FAILURE` to the system log.
-        - If the model returns non-JSON or parsing fails, log and return an error.
-        """
-        retrieved = self.knowledge_base.search(user_question)
-        snippets = retrieved if retrieved else {"_note": "No KB match found"}
-
-        try:
-            import google.generativeai as genai  # type: ignore
-            from google.generativeai.types import GenerationConfig  # type: ignore
-
-            api_key = os.getenv("GOOGLE_API_KEY")
-            if api_key:
-                genai.configure(api_key=api_key)
-
-            model = genai.GenerativeModel("gemini-2.5-flash-lite")
-
-            prompt = (
-                "You are a conservative pet-health coordinator.\n\n"
-                "Knowledge snippets (only include the matching snippets):\n"
-                f"{json.dumps(snippets, indent=2)}\n\n"
-                "User question:\n"
-                f"{user_question}\n\n"
-                "Return JSON only with keys: intent, summary, retrieved_guideline, actions."
-            )
-
-            gen_cfg = GenerationConfig(response_mime_type="application/json", temperature=0.2)
-            response = model.generate_content(prompt, generation_config=gen_cfg)
-
-            # Different client versions expose the content differently; check common attrs.
-            text = None
-            if hasattr(response, "text"):
-                text = response.text
-            elif hasattr(response, "content"):
-                text = response.content
-            elif isinstance(response, str):
-                text = response
-
-            if not text:
-                raise ValueError("empty response from Gemini")
-
-            try:
-                parsed = json.loads(text)
-                return parsed
-            except json.JSONDecodeError:
-                _SYSTEM_LOGGER.exception("AI_PLANNING_FAILURE")
-                return {"error": "malformed_json", "raw": text}
-
-        except ImportError:
-            _SYSTEM_LOGGER.info("google.generativeai not installed; skipping Gemini call")
-            return {"error": "gemini_unavailable", "retrieved": retrieved}
-        except Exception as exc:
-            _SYSTEM_LOGGER.exception("AI_PLANNING_FAILURE")
-            return {"error": "AI_PLANNING_FAILURE", "detail": str(exc)}
 
     def _parse_plan(self, raw_plan: str) -> AgentPlan:
         try:
