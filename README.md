@@ -24,9 +24,8 @@ The system is organized as a unified pipeline that runs with a single call to `c
 1. **User input** enters the Streamlit UI or command-line demo.
 2. **Retriever** searches `pet_health_data.json` for symptom keywords such as lethargy, appetite, or itching.
 3. **Medical record store** ingests uploaded notes or discharge summaries and searches them for related context.
-4. **Planner client** (Gemini, OpenAI, or RuleBasedPlanner) receives the retrieved guideline, uploaded records, and the pet's recent logs, then decides what to do next. The planner is chosen at initialization based on available API keys:
+4. **Planner client** (`GeminiPlanClient` or `RuleBasedPlanner`) receives the retrieved guideline, uploaded records, and the pet's recent logs, then decides what to do next. The planner is chosen at initialization based on available API keys:
    - If `GOOGLE_API_KEY` is set → uses `GeminiPlanClient` (enforces JSON output to eliminate malformed responses)
-   - Else if `OPENAI_API_KEY` is set → uses `OpenAIPlanClient`
    - Else → falls back to `RuleBasedPlanner` (always available)
 5. **Actuator** automatically adds a task or updates the pet log based on the planner's decision.
 6. **Response layer** explains the guideline and record evidence that were used, along with the actions taken.
@@ -41,6 +40,7 @@ Supporting reflection artifact: [model_card.md](model_card.md)
 2. Install the dependencies.
 3. Add your Gemini API key to `.env` as `GOOGLE_API_KEY=...`.
 4. Run the console demo or the Streamlit app.
+5. Optional but recommended: clear `system.log` before the first run so the reliability data you see starts fresh.
 
 ```powershell
 python -m venv .venv
