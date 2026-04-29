@@ -1,7 +1,15 @@
 import streamlit as st
 from datetime import time
 
-from pawpal_system import Owner, Pet, Scheduler, Task
+try:
+    from dotenv import load_dotenv
+except ImportError:  # pragma: no cover - optional dependency
+    load_dotenv = None
+
+if load_dotenv is not None:
+    load_dotenv()
+
+from pawpal_system import Owner, Pet, PetCareSystem, Scheduler, Task
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -45,6 +53,27 @@ At minimum, your system should:
 - Explain the plan (why each task was chosen and when it happens)
 """
     )
+
+st.divider()
+
+st.subheader("Smart Health Coordinator")
+st.caption("Retrieve pet health guidance, compare it with recent logs, and automate follow-up actions.")
+
+if "care_system" not in st.session_state:
+    st.session_state.care_system = PetCareSystem(st.session_state.owner)
+
+health_request = st.text_area(
+    "Describe the concern",
+    value="Buddy has been lethargic and has not eaten in 12 hours",
+    height=100,
+)
+
+if st.button("Coordinate pet care"):
+    if not st.session_state.owner.pets:
+        st.warning("Add a pet first so the coordinator can act on a real profile.")
+    else:
+        coordinator_response = st.session_state.care_system.coordinate_pet_care(health_request)
+        st.success(coordinator_response)
 
 st.divider()
 
