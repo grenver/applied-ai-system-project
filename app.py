@@ -114,7 +114,7 @@ if st.session_state.owner.pets:
     with tab1:
         health_request = st.text_area(
             "Describe the concern",
-            placeholder="Buddy has been lethargic and has not eaten in 12 hours",
+            placeholder="Mochi has been lethargic and has not eaten in 12 hours",
             height=100,
         )
 
