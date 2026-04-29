@@ -22,39 +22,14 @@ if not _SYSTEM_LOGGER.handlers:
     _SYSTEM_LOGGER.propagate = False
 
 
-def _default_preferences() -> dict[str, Any]:
-    """Return a default preferences dictionary."""
-    return {}
-
-
-def _default_pet_ids() -> list[str]:
-    """Return a default empty list of pet IDs."""
-    return []
-
-
-def _default_pets() -> dict[str, Pet]:
-    """Return a default pet registry mapping."""
-    return {}
-
-
-def _default_care_notes() -> list[str]:
-    """Return a default empty list of pet care notes."""
-    return []
-
-
-def _default_tasks() -> list[Task]:
-    """Return a default empty list of tasks."""
-    return []
-
-
 @dataclass
 class Owner:
     owner_id: str
     name: str
     available_minutes_per_day: int = 60
-    preferences: dict[str, Any] = field(default_factory=_default_preferences)
-    pet_ids: list[str] = field(default_factory=_default_pet_ids)
-    pets: dict[str, Pet] = field(default_factory=_default_pets)
+    preferences: dict[str, Any] = field(default_factory=dict)
+    pet_ids: list[str] = field(default_factory=list)
+    pets: dict[str, Pet] = field(default_factory=dict)
 
     def update_preferences(self, preferences: dict[str, Any]) -> None:
         """Merge new preference values into the owner's preferences."""
@@ -100,8 +75,8 @@ class Pet:
     name: str
     species: str
     age_years: int
-    care_notes: list[str] = field(default_factory=_default_care_notes)
-    tasks: list[Task] = field(default_factory=_default_tasks)
+    care_notes: list[str] = field(default_factory=list)
+    tasks: list[Task] = field(default_factory=list)
 
     def add_care_note(self, note: str) -> None:
         """Store a new care note for this pet."""
@@ -159,6 +134,50 @@ class Task:
         """Convert textual priority into a numeric score for sorting tasks."""
         priority_to_score = {"low": 1, "medium": 2, "high": 3}
         return priority_to_score.get(self.priority.lower(), 0)
+
+
+@dataclass
+class MedicalRecordEntry:
+    record_id: str
+    pet_id: str
+    source_name: str
+    content: str
+
+
+class MedicalRecordStore:
+    def __init__(self) -> None:
+        self.records: list[MedicalRecordEntry] = []
+
+    def add_record(self, pet_id: str, source_name: str, content: str) -> MedicalRecordEntry:
+        entry = MedicalRecordEntry(
+            record_id=self._next_record_id(),
+            pet_id=pet_id,
+            source_name=source_name,
+            content=content.strip(),
+        )
+        self.records.append(entry)
+        return entry
+
+    def search(self, user_input: str, pet_id: Optional[str] = None) -> list[MedicalRecordEntry]:
+        user_text = user_input.lower()
+        user_terms = {term for term in re.findall(r"[a-zA-Z']+", user_text) if len(term) > 2}
+
+        matches: list[MedicalRecordEntry] = []
+        for record in self.records:
+            if pet_id is not None and record.pet_id != pet_id:
+                continue
+
+            record_text = record.content.lower()
+            if any(term in record_text for term in user_terms):
+                matches.append(record)
+
+        return matches
+
+    def format_matches(self, matches: list[MedicalRecordEntry]) -> dict[str, str]:
+        return {record.record_id: f"{record.source_name}: {record.content}" for record in matches}
+
+    def _next_record_id(self) -> str:
+        return f"record_{len(self.records) + 1:03d}"
 
 
 class Scheduler:
@@ -404,12 +423,6 @@ class Scheduler:
         return "\n".join(lines)
 
 
-class DailyScheduler(Scheduler):
-    """Compatibility alias while transitioning naming to Scheduler."""
-
-    pass
-
-
 @dataclass
 class AgentAction:
     type: str
@@ -440,10 +453,27 @@ class PetHealthKnowledgeBase:
 
     def search(self, user_input: str) -> dict[str, str]:
         user_text = user_input.lower()
+        alias_map = {
+            "lethargic": "lethargy",
+            "tired": "lethargy",
+            "low energy": "lethargy",
+            "not eaten": "appetite",
+            "hasn't eaten": "appetite",
+            "has not eaten": "appetite",
+            "won't eat": "appetite",
+            "won\'t eat": "appetite",
+            "scratching": "itching",
+            "itchy": "itching",
+        }
         matches: dict[str, str] = {}
         for keyword, guideline in self.entries.items():
             if keyword in user_text:
                 matches[keyword] = guideline
+
+        for alias, keyword in alias_map.items():
+            if alias in user_text and keyword in self.entries:
+                matches[keyword] = self.entries[keyword]
+
         return matches
 
 
@@ -488,9 +518,10 @@ class OpenAIPlanClient:
 
 
 class RuleBasedPlanner:
-    def generate_plan(self, prompt: str, context: dict[str, Any]) -> str:
-        user_input = context.get("user_input", "").lower()
+    def generate_plan(self, user_input: str, context: dict[str, Any]) -> str:
+        user_input = user_input.lower()
         retrieved = context.get("retrieved_guidelines", {})
+        medical_records = context.get("medical_records", {})
         pet = context.get("pet", {})
         recent_logs = context.get("recent_logs", [])
 
@@ -513,6 +544,23 @@ class RuleBasedPlanner:
                     }
                 )
                 break
+
+        if not actions and medical_records:
+            actions.append(
+                {
+                    "type": "add_task",
+                    "reason": "Uploaded medical records contain symptom context that should be reviewed.",
+                    "pet_name": pet.get("name"),
+                    "task": {
+                        "description": "Review uploaded medical records",
+                        "category": "health",
+                        "duration_minutes": 15,
+                        "priority": "medium",
+                        "frequency": "once",
+                        "is_mandatory": False,
+                    },
+                }
+            )
 
         if "log" in user_input or recent_logs:
             actions.append(
@@ -541,6 +589,7 @@ class PetCareSystem:
         self.owner = owner
         self.scheduler = Scheduler(owner)
         self.knowledge_base = knowledge_base or PetHealthKnowledgeBase()
+        self.medical_records = MedicalRecordStore()
         self.llm_client = llm_client or OpenAIPlanClient.from_environment() or RuleBasedPlanner()
 
     def add_task(self, task: Task) -> None:
@@ -549,22 +598,30 @@ class PetCareSystem:
     def add_log(self, pet_id: str, message: str) -> None:
         self.owner.get_pet(pet_id).add_log(message)
 
+    def ingest_medical_record(self, pet_id: str, source_name: str, content: str) -> MedicalRecordEntry:
+        if pet_id not in self.owner.pets:
+            raise KeyError(f"pet '{pet_id}' not found")
+        return self.medical_records.add_record(pet_id=pet_id, source_name=source_name, content=content)
+
+    def retrieve_hybrid_context(self, user_input: str, pet: Pet) -> dict[str, Any]:
+        retrieved_guidelines = self.knowledge_base.search(user_input)
+        matched_records = self.medical_records.search(user_input, pet_id=pet.pet_id)
+        return {
+            "retrieved_guidelines": retrieved_guidelines,
+            "medical_records": self.medical_records.format_matches(matched_records),
+            "recent_logs": list(pet.care_notes[-5:]),
+        }
+
     def coordinate_pet_care(self, user_input: str) -> str:
         try:
-            retrieved_guidelines = self.knowledge_base.search(user_input)
             pet = self._resolve_pet_from_input(user_input)
-            recent_logs = list(pet.care_notes[-5:])
-
-            llm_input = {
-                "user_input": user_input,
-                "retrieved_guidelines": retrieved_guidelines,
-                "recent_logs": recent_logs,
-                "pet": {
-                    "pet_id": pet.pet_id,
-                    "name": pet.name,
-                    "species": pet.species,
-                    "age_years": pet.age_years,
-                },
+            llm_input = self.retrieve_hybrid_context(user_input, pet)
+            llm_input["user_input"] = user_input
+            llm_input["pet"] = {
+                "pet_id": pet.pet_id,
+                "name": pet.name,
+                "species": pet.species,
+                "age_years": pet.age_years,
             }
 
             raw_plan = self._generate_plan(user_input, llm_input)
@@ -583,10 +640,13 @@ class PetCareSystem:
                 else:
                     raise ValueError(f"Unsupported action type: {action.type}")
 
-            cited_guideline = next(iter(retrieved_guidelines.values()), "No direct guideline matched.")
+            cited_guideline = next(iter(llm_input["retrieved_guidelines"].values()), "No direct guideline matched.")
+            cited_record = next(iter(llm_input["medical_records"].values()), None)
             actions_text = ", ".join(actions_taken) if actions_taken else "no actions were needed"
+            record_text = f" Uploaded record cited: {cited_record}." if cited_record else ""
             return (
                 f"Guideline cited: {cited_guideline} "
+                f"{record_text}"
                 f"Analysis: {plan.summary}. "
                 f"Actions taken: {actions_text}."
             )
