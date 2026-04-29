@@ -125,7 +125,7 @@ Quick test command:
 This project taught me how to combine retrieval, reasoning, and automation into a single application instead of treating AI as a standalone feature. It also reinforced that reliability matters as much as model quality, because the system needs guardrails, fallback behavior, and clear explanations to be trustworthy in practice.
 
 ## Demo Walkthrough
-Loom video: _add your link here_
+Demo Video: https://drive.google.com/file/d/1kA_6wN7Otdn6zTfPMu6hQ1jwHkuXJSSs/view?usp=sharing 
 
 The walkthrough should show:
 - End-to-end system execution
