@@ -3,6 +3,7 @@
 ## Model / System Overview
 PawPal+ is not a single trained model. It is an applied AI system that combines:
 - A lightweight retrieval layer over `pet_health_data.json`
+- A hybrid retrieval layer that also ingests user-uploaded medical records
 - An LLM planning step for symptom triage and action selection
 - Deterministic fallback logic when the model is unavailable or returns malformed output
 - Logging and guardrails for reliability
@@ -24,6 +25,7 @@ This project extends my original **PawPal+** scheduling assistant from earlier c
 ### Inputs
 - Free-form user text describing a pet concern
 - Recent pet logs or notes
+- Uploaded medical records or discharge notes
 - A small health knowledge base in JSON form
 
 ### Outputs
@@ -38,7 +40,9 @@ The system uses a simple local knowledge base, `pet_health_data.json`, with shor
 - appetite
 - itching
 
-This keeps the project reproducible and easy to inspect.
+The system also accepts user-uploaded medical records, which are stored in-memory during the session and searched alongside the static knowledge base.
+
+This keeps the project reproducible and easy to inspect while still allowing personalized context.
 
 ## Guardrails and Reliability
 The system includes the following reliability features:
