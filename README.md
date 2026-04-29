@@ -16,17 +16,20 @@ This version extends the original scheduler into a smarter applied AI system wit
 - **Reliability guardrails:** structured error handling and `AI_PLANNING_FAILURE` logging
 - **Automated actions:** the system can call `add_task` or `add_log` on the user's behalf
 
-In practice, that means the AI does more than summarize text. It uses retrieved health guidance to shape the next action and then confirms that action back to the user.
+In practice, that means the AI does more than summarize text. A single call to `coordinate_pet_care()` orchestrates retrieval, planning, and action execution. It uses retrieved health guidance to shape the next action and then confirms that action back to the user. The system gracefully falls back to rule-based planning if no LLM is available.
 
 ## Architecture Overview
-The system is organized as a small pipeline:
+The system is organized as a unified pipeline that runs with a single call to `care_system.coordinate_pet_care()`:
 
 1. **User input** enters the Streamlit UI or command-line demo.
 2. **Retriever** searches `pet_health_data.json` for symptom keywords such as lethargy, appetite, or itching.
 3. **Medical record store** ingests uploaded notes or discharge summaries and searches them for related context.
-4. **Planner / LLM** compares the retrieved guideline, uploaded records, and the pet's recent logs, then decides what to do next.
-5. **Actuator** automatically adds a task or updates the pet log.
-6. **Response layer** explains the guideline and record evidence that were used.
+4. **Planner client** (Gemini, OpenAI, or RuleBasedPlanner) receives the retrieved guideline, uploaded records, and the pet's recent logs, then decides what to do next. The planner is chosen at initialization based on available API keys:
+   - If `GOOGLE_API_KEY` is set → uses `GeminiPlanClient` (enforces JSON output to eliminate malformed responses)
+   - Else if `OPENAI_API_KEY` is set → uses `OpenAIPlanClient`
+   - Else → falls back to `RuleBasedPlanner` (always available)
+5. **Actuator** automatically adds a task or updates the pet log based on the planner's decision.
+6. **Response layer** explains the guideline and record evidence that were used, along with the actions taken.
 7. **Logging and guardrails** capture failures and malformed outputs in `system.log`.
 
 Architecture diagram source: [assets/system_architecture.mmd](assets/system_architecture.mmd)
