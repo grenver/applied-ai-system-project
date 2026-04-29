@@ -1,6 +1,9 @@
 flowchart TD
     U[User Input\nStreamlit UI or main.py] --> R[Retriever\nSearch pet_health_data.json]
-    R --> C[Context Builder\nRecent logs + pet profile]
+    U --> M[Medical Record Upload\nUser-uploaded discharge notes]
+    M --> S[Medical Record Store\nIn-memory session records]
+    R --> C[Context Builder\nStatic guidelines + recent logs]
+    S --> C
     C --> P[Planner\nGemini 2.5 Flash-Lite or fallback]
     P --> D{Decision}
     D -->|Add task| T[add_task\nSchedule Vet Visit or follow-up]
