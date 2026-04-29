@@ -145,3 +145,275 @@ Traceback (most recent call last):
   File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 668, in _parse_plan
     raise ValueError("Malformed LLM output") from exc
 ValueError: Malformed LLM output
+2026-04-28 22:44:57,510 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 570, in coordinate_pet_care
+    raw_plan = self._generate_plan(user_input, llm_input)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 601, in _generate_plan
+    return self.llm_client.generate_plan(user_input=user_input, context=context)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: RuleBasedPlanner.generate_plan() got an unexpected keyword argument 'user_input'
+2026-04-28 22:45:35,312 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 666, in _parse_plan
+    data = json.loads(raw_plan)
+  File "C:\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 571, in coordinate_pet_care
+    plan = self._parse_plan(raw_plan)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 668, in _parse_plan
+    raise ValueError("Malformed LLM output") from exc
+ValueError: Malformed LLM output
+2026-04-28 23:17:29,518 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 683, in _parse_plan
+    data = json.loads(raw_plan)
+  File "C:\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 588, in coordinate_pet_care
+    plan = self._parse_plan(raw_plan)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 685, in _parse_plan
+    raise ValueError("Malformed LLM output") from exc
+ValueError: Malformed LLM output
+2026-04-28 23:20:05,826 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 683, in _parse_plan
+    data = json.loads(raw_plan)
+  File "C:\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 588, in coordinate_pet_care
+    plan = self._parse_plan(raw_plan)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 685, in _parse_plan
+    raise ValueError("Malformed LLM output") from exc
+ValueError: Malformed LLM output
+2026-04-28 23:20:14,801 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 683, in _parse_plan
+    data = json.loads(raw_plan)
+  File "C:\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 588, in coordinate_pet_care
+    plan = self._parse_plan(raw_plan)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 685, in _parse_plan
+    raise ValueError("Malformed LLM output") from exc
+ValueError: Malformed LLM output
+2026-04-28 23:23:25,935 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 757, in _parse_plan
+    data = json.loads(raw_plan)
+  File "C:\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 659, in coordinate_pet_care
+    plan = self._parse_plan(raw_plan)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 759, in _parse_plan
+    raise ValueError("Malformed LLM output") from exc
+ValueError: Malformed LLM output
+2026-04-28 23:24:13,914 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 757, in _parse_plan
+    data = json.loads(raw_plan)
+  File "C:\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 659, in coordinate_pet_care
+    plan = self._parse_plan(raw_plan)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 759, in _parse_plan
+    raise ValueError("Malformed LLM output") from exc
+ValueError: Malformed LLM output
+2026-04-28 23:25:38,861 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 726, in _parse_plan
+    data = json.loads(raw_plan)
+  File "C:\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 628, in coordinate_pet_care
+    plan = self._parse_plan(raw_plan)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 728, in _parse_plan
+    raise ValueError("Malformed LLM output") from exc
+ValueError: Malformed LLM output
+2026-04-28 23:26:25,338 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 726, in _parse_plan
+    data = json.loads(raw_plan)
+  File "C:\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 628, in coordinate_pet_care
+    plan = self._parse_plan(raw_plan)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 728, in _parse_plan
+    raise ValueError("Malformed LLM output") from exc
+ValueError: Malformed LLM output
+2026-04-28 23:26:33,223 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 726, in _parse_plan
+    data = json.loads(raw_plan)
+  File "C:\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 628, in coordinate_pet_care
+    plan = self._parse_plan(raw_plan)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 728, in _parse_plan
+    raise ValueError("Malformed LLM output") from exc
+ValueError: Malformed LLM output
+2026-04-28 23:27:44,714 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 726, in _parse_plan
+    data = json.loads(raw_plan)
+  File "C:\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 628, in coordinate_pet_care
+    plan = self._parse_plan(raw_plan)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 728, in _parse_plan
+    raise ValueError("Malformed LLM output") from exc
+ValueError: Malformed LLM output
+2026-04-28 23:28:23,784 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 726, in _parse_plan
+    data = json.loads(raw_plan)
+  File "C:\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 628, in coordinate_pet_care
+    plan = self._parse_plan(raw_plan)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 728, in _parse_plan
+    raise ValueError("Malformed LLM output") from exc
+ValueError: Malformed LLM output
+2026-04-28 23:29:09,960 ERROR AI_PLANNING_FAILURE
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 726, in _parse_plan
+    data = json.loads(raw_plan)
+  File "C:\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 628, in coordinate_pet_care
+    plan = self._parse_plan(raw_plan)
+  File "C:\Users\aneeq\vs code projects\applied-ai-system-project\pawpal_system.py", line 728, in _parse_plan
+    raise ValueError("Malformed LLM output") from exc
+ValueError: Malformed LLM output
