@@ -1,19 +1,21 @@
 # PawPal+ Smart Health Coordinator
 
 ## Project Summary
-PawPal+ started as a pet-care scheduling project for planning daily tasks such as feeding, walks, and playtime. In this final version, it has been extended into a Smart Health Coordinator that uses retrieval, agentic planning, and reliability guardrails to help a pet owner respond to symptom-based health concerns.
+PawPal+ began as a pet-care scheduling project for organizing daily tasks such as feeding, walks, and playtime. In this final version, it has been extended into a Smart Health Coordinator that combines retrieval, agentic planning, and reliability guardrails to help a pet owner respond to symptom-based health concerns.
 
-This system matters because it turns a simple planning app into a more practical applied AI workflow: it looks up pet health guidance, compares that guidance to the owner's recent notes and logs, decides whether to add a follow-up task or update a log, and returns a clear explanation of what happened.
+This project matters because it turns a simple planning app into a practical applied AI workflow. The system looks up pet health guidance, compares that guidance to the owner's recent notes and logs, decides whether to add a follow-up task or update a log, and explains what happened in plain language.
 
 ## Original Project
 The original project was **PawPal+**, a pet scheduling assistant built to organize daily care tasks for one or more pets. It could represent owners, pets, and tasks, then generate a simple schedule based on time, priority, and feasibility constraints.
 
 ## What Changed in This Version
-This project extends the original scheduler into a smarter applied AI system with:
+This version extends the original scheduler into a smarter applied AI system with:
 - **Retrieval-Augmented Generation (RAG):** keyword search over `pet_health_data.json`
 - **Agentic workflow:** plan, act, and verify loop inside `PetCareSystem`
 - **Reliability guardrails:** structured error handling and `AI_PLANNING_FAILURE` logging
 - **Automated actions:** the system can call `add_task` or `add_log` on the user's behalf
+
+In practice, that means the AI does more than summarize text. It uses retrieved health guidance to shape the next action and then confirms that action back to the user.
 
 ## Architecture Overview
 The system is organized as a small pipeline:
@@ -104,6 +106,8 @@ Testing results to report:
 - The unit test suite passes with 3/3 tests green.
 - Remaining risk: Gemini output quality depends on the external API and network availability.
 
+This testing approach gives the project a small but meaningful reliability story: retrieval works, action execution works, malformed plans are handled safely, and the UI no longer crashes on startup.
+
 Quick test command:
 
 ```powershell
@@ -111,7 +115,7 @@ Quick test command:
 ```
 
 ## Reflection
-This project taught me how to combine retrieval, reasoning, and automation into a single application instead of treating AI as a standalone feature. It also showed me that reliability matters as much as model quality, because the system needs guardrails, fallback behavior, and clear explanations to be trustworthy in practice.
+This project taught me how to combine retrieval, reasoning, and automation into a single application instead of treating AI as a standalone feature. It also reinforced that reliability matters as much as model quality, because the system needs guardrails, fallback behavior, and clear explanations to be trustworthy in practice.
 
 ## Demo Walkthrough
 Loom video: _add your link here_
@@ -125,6 +129,8 @@ The walkthrough should show:
 
 ## Portfolio Note
 PawPal+ demonstrates that I can take an earlier prototype and extend it into a more complete applied AI system with retrieval, planning, logging, and user-facing explanation.
+
+This project shows that I can work from a smaller prototype, identify the missing production pieces, and turn it into a documented system with clear behavior and verification.
 
 ## Repository Contents
 - `app.py` - Streamlit interface
