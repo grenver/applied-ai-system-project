@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
 """
-Demo script to test PawPal+ system logic.
-Creates a sample owner, pets, and tasks, then generates a daily schedule.
+Demo script for the Smart Health Coordinator upgrade.
+Creates a sample owner, pets, tasks, and runs the new care coordination flow.
 """
 
 from datetime import time
-from pawpal_system import Owner, Pet, Task, Scheduler
+
+try:
+    from dotenv import load_dotenv
+except ImportError:  # pragma: no cover - optional dependency
+    load_dotenv = None
+
+if load_dotenv is not None:
+    load_dotenv()
+
+from pawpal_system import Owner, Pet, PetCareSystem, Task, Scheduler
 
 
 def main():
@@ -168,6 +177,20 @@ def main():
         print(f"⏱️  Remaining buffer: {remaining} min")
     else:
         print("No tasks fit in today's schedule.")
+
+    print("\n" + "=" * 60)
+    print("🩺 SMART HEALTH COORDINATION")
+    print("=" * 60)
+
+    care_system = PetCareSystem(owner)
+    response = care_system.coordinate_pet_care(
+        "Buddy has been lethargic and has not eaten in 12 hours"
+    )
+    print(response)
+
+    print("\n--- Gemini Query (KB-first, edge case handled) ---")
+    gemini_response = care_system.ask_gemini_for_plan("Buddy has been lethargic and has not eaten in 12 hours")
+    print(gemini_response)
 
     print("\n" + "=" * 60)
 
