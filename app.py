@@ -1,4 +1,5 @@
 import streamlit as st
+import hashlib
 from datetime import time
 
 try:
@@ -66,8 +67,47 @@ if "scheduler" not in st.session_state:
 if "care_system" not in st.session_state:
     st.session_state.care_system = PetCareSystem(st.session_state.owner)
 
+if "uploaded_record_count" not in st.session_state:
+    st.session_state.uploaded_record_count = 0
+
+if "uploaded_record_hashes" not in st.session_state:
+    st.session_state.uploaded_record_hashes = set()
+
 st.subheader("Smart Health Coordinator")
-st.caption("Retrieve pet health guidance, compare it with recent logs, and automate follow-up actions.")
+st.caption("Retrieve pet health guidance, compare it with recent logs and uploaded records, and automate follow-up actions.")
+
+if st.session_state.owner.pets:
+    upload_pet_id = st.selectbox(
+        "Associate uploaded medical record with pet",
+        options=list(st.session_state.owner.pets.keys()),
+        format_func=lambda pid: f"{st.session_state.owner.pets[pid].name} ({pid})",
+        key="medical_record_pet",
+    )
+    uploaded_file = st.file_uploader(
+        "Upload a medical record or discharge note",
+        type=["txt", "md", "json", "csv"],
+    )
+
+    if uploaded_file is not None:
+        record_bytes = uploaded_file.read()
+        record_hash = hashlib.sha256(record_bytes).hexdigest()
+        if record_hash not in st.session_state.uploaded_record_hashes:
+            record_text = record_bytes.decode("utf-8", errors="ignore")
+            st.session_state.care_system.ingest_medical_record(
+                pet_id=upload_pet_id,
+                source_name=uploaded_file.name,
+                content=record_text,
+            )
+            st.session_state.uploaded_record_hashes.add(record_hash)
+            st.session_state.uploaded_record_count += 1
+            st.success(f"Uploaded record saved for {st.session_state.owner.get_pet(upload_pet_id).name}.")
+        else:
+            st.info("This medical record was already loaded during this session.")
+
+    if st.session_state.uploaded_record_count:
+        st.info(f"Loaded {st.session_state.uploaded_record_count} uploaded medical record(s) into hybrid RAG.")
+else:
+    st.info("Add a pet first to attach uploaded medical records to a profile.")
 
 health_request = st.text_area(
     "Describe the concern",
