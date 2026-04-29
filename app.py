@@ -56,11 +56,18 @@ At minimum, your system should:
 
 st.divider()
 
-st.subheader("Smart Health Coordinator")
-st.caption("Retrieve pet health guidance, compare it with recent logs, and automate follow-up actions.")
+# Persist backend objects across Streamlit reruns.
+if "owner" not in st.session_state:
+    st.session_state.owner = Owner(owner_id="owner_001", name="Jordan")
+
+if "scheduler" not in st.session_state:
+    st.session_state.scheduler = Scheduler(st.session_state.owner)
 
 if "care_system" not in st.session_state:
     st.session_state.care_system = PetCareSystem(st.session_state.owner)
+
+st.subheader("Smart Health Coordinator")
+st.caption("Retrieve pet health guidance, compare it with recent logs, and automate follow-up actions.")
 
 health_request = st.text_area(
     "Describe the concern",
@@ -78,14 +85,7 @@ if st.button("Coordinate pet care"):
 st.divider()
 
 st.subheader("Owner and Pets")
-owner_name = st.text_input("Owner name", value="Jordan")
-
-# Persist backend objects across Streamlit reruns.
-if "owner" not in st.session_state:
-    st.session_state.owner = Owner(owner_id="owner_001", name=owner_name)
-
-if "scheduler" not in st.session_state:
-    st.session_state.scheduler = Scheduler(st.session_state.owner)
+owner_name = st.text_input("Owner name", value=st.session_state.owner.name)
 
 if "task_counter" not in st.session_state:
     st.session_state.task_counter = 1
