@@ -59,13 +59,26 @@ with st.sidebar:
     if "selected_pet_id" not in st.session_state:
         st.session_state.selected_pet_id = None
 
-    owner_name = st.text_input("Owner name", value=st.session_state.owner.name)
+    owner_name = st.text_input(
+        "Your name",
+        value="",
+        placeholder="e.g., Jordan",
+    )
     st.session_state.owner.name = owner_name
 
     with st.form("add_pet_form"):
-        new_pet_name = st.text_input("Pet name", value="Mochi")
+        new_pet_name = st.text_input(
+            "Pet name",
+            value="",
+            placeholder="e.g., Mochi",
+        )
         new_pet_species = st.selectbox("Species", ["dog", "cat", "other"])
-        new_pet_age = st.number_input("Pet age (years)", min_value=0, max_value=40, value=1)
+        new_pet_age = st.number_input(
+            "Pet age (years)",
+            min_value=0,
+            max_value=40,
+            value=0,
+        )
         add_pet_clicked = st.form_submit_button("Add pet")
 
     if add_pet_clicked:
@@ -170,9 +183,18 @@ if st.session_state.owner.pets:
 
         col1, col2, col3 = st.columns(3)
         with col1:
-            task_title = st.text_input("Task title", value="Morning walk")
+            task_title = st.text_input(
+                "Task title",
+                value="",
+                placeholder="e.g., Morning walk",
+            )
         with col2:
-            duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
+            duration = st.number_input(
+                "Duration (minutes)",
+                min_value=1,
+                max_value=240,
+                value=1,
+            )
         with col3:
             priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
 
