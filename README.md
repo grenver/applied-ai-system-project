@@ -11,6 +11,7 @@ The original project was **PawPal+**, a pet scheduling assistant built to organi
 ## What Changed in This Version
 This version extends the original scheduler into a smarter applied AI system with:
 - **Retrieval-Augmented Generation (RAG):** keyword search over `pet_health_data.json`
+- **Hybrid RAG:** static expert guidance plus user-uploaded medical records
 - **Agentic workflow:** plan, act, and verify loop inside `PetCareSystem`
 - **Reliability guardrails:** structured error handling and `AI_PLANNING_FAILURE` logging
 - **Automated actions:** the system can call `add_task` or `add_log` on the user's behalf
@@ -22,10 +23,11 @@ The system is organized as a small pipeline:
 
 1. **User input** enters the Streamlit UI or command-line demo.
 2. **Retriever** searches `pet_health_data.json` for symptom keywords such as lethargy, appetite, or itching.
-3. **Planner / LLM** compares the retrieved guideline with the pet's recent logs and decides what to do next.
-4. **Actuator** automatically adds a task or updates the pet log.
-5. **Response layer** explains the guideline that was used and the action that was taken.
-6. **Logging and guardrails** capture failures and malformed outputs in `system.log`.
+3. **Medical record store** ingests uploaded notes or discharge summaries and searches them for related context.
+4. **Planner / LLM** compares the retrieved guideline, uploaded records, and the pet's recent logs, then decides what to do next.
+5. **Actuator** automatically adds a task or updates the pet log.
+6. **Response layer** explains the guideline and record evidence that were used.
+7. **Logging and guardrails** capture failures and malformed outputs in `system.log`.
 
 Architecture diagram source: [assets/system_architecture.mmd](assets/system_architecture.mmd)
 
