@@ -188,10 +188,6 @@ def main():
     )
     print(response)
 
-    print("\n--- Gemini Query (KB-first, edge case handled) ---")
-    gemini_response = care_system.ask_gemini_for_plan("Buddy has been lethargic and has not eaten in 12 hours")
-    print(gemini_response)
-
     print("\n" + "=" * 60)
 
 
