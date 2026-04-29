@@ -1,9 +1,25 @@
 from __future__ import annotations
 
 from collections import defaultdict
+import json
+import logging
+import os
+import re
 from dataclasses import dataclass, field
 from datetime import time
 from typing import Any, Optional
+
+
+SYSTEM_LOG_FILE = "system.log"
+PET_HEALTH_DATA_FILE = "pet_health_data.json"
+
+_SYSTEM_LOGGER = logging.getLogger("pawpal.system")
+if not _SYSTEM_LOGGER.handlers:
+    _SYSTEM_LOGGER.setLevel(logging.INFO)
+    _file_handler = logging.FileHandler(SYSTEM_LOG_FILE, encoding="utf-8")
+    _file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+    _SYSTEM_LOGGER.addHandler(_file_handler)
+    _SYSTEM_LOGGER.propagate = False
 
 
 def _default_preferences() -> dict[str, Any]:
@@ -91,6 +107,10 @@ class Pet:
         """Store a new care note for this pet."""
         if note.strip():
             self.care_notes.append(note.strip())
+
+    def add_log(self, note: str) -> None:
+        """Compatibility alias for systems that use log terminology."""
+        self.add_care_note(note)
 
     def get_profile_summary(self) -> str:
         """Return a concise profile summary for display in the UI."""
@@ -388,3 +408,315 @@ class DailyScheduler(Scheduler):
     """Compatibility alias while transitioning naming to Scheduler."""
 
     pass
+
+
+@dataclass
+class AgentAction:
+    type: str
+    reason: str = ""
+    pet_name: Optional[str] = None
+    task: dict[str, Any] = field(default_factory=dict)
+    log_message: str = ""
+
+
+@dataclass
+class AgentPlan:
+    intent: str
+    summary: str
+    actions: list[AgentAction] = field(default_factory=list)
+
+
+class PetHealthKnowledgeBase:
+    def __init__(self, file_path: str = PET_HEALTH_DATA_FILE) -> None:
+        self.file_path = file_path
+        self.entries = self._load_entries()
+
+    def _load_entries(self) -> dict[str, str]:
+        if not os.path.exists(self.file_path):
+            return {}
+        with open(self.file_path, "r", encoding="utf-8") as file:
+            raw_data = json.load(file)
+        return {str(key).lower(): str(value) for key, value in raw_data.items()}
+
+    def search(self, user_input: str) -> dict[str, str]:
+        user_text = user_input.lower()
+        matches: dict[str, str] = {}
+        for keyword, guideline in self.entries.items():
+            if keyword in user_text:
+                matches[keyword] = guideline
+        return matches
+
+
+class OpenAIPlanClient:
+    def __init__(self, model: str = "gpt-4o-mini") -> None:
+        self.model = model
+
+    @classmethod
+    def from_environment(cls) -> Optional["OpenAIPlanClient"]:
+        if not os.getenv("OPENAI_API_KEY"):
+            return None
+        try:
+            import openai  # type: ignore[import-not-found]
+        except ImportError:
+            return None
+        return cls(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
+
+    def generate_plan(self, user_input: str, context: dict[str, Any]) -> str:
+        from openai import OpenAI  # type: ignore[import-not-found]
+
+        client = OpenAI()
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You are a pet health planning agent. Return JSON only with keys "
+                    "intent, summary, and actions. Each action should include a type, "
+                    "reason, pet_name, and any execution fields."
+                ),
+            },
+            {
+                "role": "user",
+                "content": json.dumps({"user_input": user_input, "context": context}, indent=2),
+            },
+        ]
+        response = client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=0.2,
+        )
+        return response.choices[0].message.content or "{}"
+
+
+class RuleBasedPlanner:
+    def generate_plan(self, prompt: str, context: dict[str, Any]) -> str:
+        user_input = context.get("user_input", "").lower()
+        retrieved = context.get("retrieved_guidelines", {})
+        pet = context.get("pet", {})
+        recent_logs = context.get("recent_logs", [])
+
+        actions: list[dict[str, Any]] = []
+        for keyword, guideline in retrieved.items():
+            if keyword in {"lethargy", "appetite", "itching"}:
+                actions.append(
+                    {
+                        "type": "add_task",
+                        "reason": f"Retrieved guideline for {keyword}: {guideline}",
+                        "pet_name": pet.get("name"),
+                        "task": {
+                            "description": "Schedule Vet Visit",
+                            "category": "health",
+                            "duration_minutes": 20,
+                            "priority": "high",
+                            "frequency": "once",
+                            "is_mandatory": True,
+                        },
+                    }
+                )
+                break
+
+        if "log" in user_input or recent_logs:
+            actions.append(
+                {
+                    "type": "add_log",
+                    "reason": "Update the pet record with the latest health summary.",
+                    "pet_name": pet.get("name"),
+                    "log_message": "Recent symptom review completed.",
+                }
+            )
+
+        if not actions:
+            actions.append({"type": "add_log", "reason": "No urgent symptom matched.", "pet_name": pet.get("name"), "log_message": "No care escalation required."})
+
+        return json.dumps(
+            {
+                "intent": "health_coordination",
+                "summary": "Compare retrieved health guidance with recent pet logs and trigger the safest next step.",
+                "actions": actions,
+            }
+        )
+
+
+class PetCareSystem:
+    def __init__(self, owner: Owner, knowledge_base: Optional[PetHealthKnowledgeBase] = None, llm_client: Any | None = None) -> None:
+        self.owner = owner
+        self.scheduler = Scheduler(owner)
+        self.knowledge_base = knowledge_base or PetHealthKnowledgeBase()
+        self.llm_client = llm_client or OpenAIPlanClient.from_environment() or RuleBasedPlanner()
+
+    def add_task(self, task: Task) -> None:
+        self.scheduler.add_task(task)
+
+    def add_log(self, pet_id: str, message: str) -> None:
+        self.owner.get_pet(pet_id).add_log(message)
+
+    def coordinate_pet_care(self, user_input: str) -> str:
+        try:
+            retrieved_guidelines = self.knowledge_base.search(user_input)
+            pet = self._resolve_pet_from_input(user_input)
+            recent_logs = list(pet.care_notes[-5:])
+
+            llm_input = {
+                "user_input": user_input,
+                "retrieved_guidelines": retrieved_guidelines,
+                "recent_logs": recent_logs,
+                "pet": {
+                    "pet_id": pet.pet_id,
+                    "name": pet.name,
+                    "species": pet.species,
+                    "age_years": pet.age_years,
+                },
+            }
+
+            raw_plan = self._generate_plan(user_input, llm_input)
+            plan = self._parse_plan(raw_plan)
+
+            actions_taken: list[str] = []
+            for action in plan.actions:
+                if action.type == "add_task":
+                    task = self._build_task_from_action(action, pet.pet_id)
+                    self.add_task(task)
+                    actions_taken.append(f"added task '{task.description}'")
+                elif action.type == "add_log":
+                    log_message = action.log_message or plan.summary
+                    self.add_log(pet.pet_id, log_message)
+                    actions_taken.append("updated pet log")
+                else:
+                    raise ValueError(f"Unsupported action type: {action.type}")
+
+            cited_guideline = next(iter(retrieved_guidelines.values()), "No direct guideline matched.")
+            actions_text = ", ".join(actions_taken) if actions_taken else "no actions were needed"
+            return (
+                f"Guideline cited: {cited_guideline} "
+                f"Analysis: {plan.summary}. "
+                f"Actions taken: {actions_text}."
+            )
+        except Exception as exc:
+            _SYSTEM_LOGGER.exception("AI_PLANNING_FAILURE")
+            return f"I could not complete care coordination safely. AI_PLANNING_FAILURE: {exc}"
+
+    def _generate_plan(self, user_input: str, context: dict[str, Any]) -> str:
+        if self.llm_client is None:
+            return RuleBasedPlanner().generate_plan(user_input, context)
+
+        return self.llm_client.generate_plan(user_input=user_input, context=context)
+
+    def ask_gemini_for_plan(self, user_question: str) -> dict[str, Any]:
+        """Attempt to call Gemini (google-generativeai) with retrieved snippets.
+
+        Edge cases handled:
+        - If the KB has no matching snippets, include a short note and still query Gemini
+          asking for conservative next steps.
+        - If the `google.generativeai` package is missing or the call fails, return
+          a structured error and log `AI_PLANNING_FAILURE` to the system log.
+        - If the model returns non-JSON or parsing fails, log and return an error.
+        """
+        retrieved = self.knowledge_base.search(user_question)
+        snippets = retrieved if retrieved else {"_note": "No KB match found"}
+
+        try:
+            import google.generativeai as genai  # type: ignore
+            from google.generativeai.types import GenerationConfig  # type: ignore
+
+            api_key = os.getenv("GOOGLE_API_KEY")
+            if api_key:
+                genai.configure(api_key=api_key)
+
+            model = genai.GenerativeModel("gemini-2.5-flash-lite")
+
+            prompt = (
+                "You are a conservative pet-health coordinator.\n\n"
+                "Knowledge snippets (only include the matching snippets):\n"
+                f"{json.dumps(snippets, indent=2)}\n\n"
+                "User question:\n"
+                f"{user_question}\n\n"
+                "Return JSON only with keys: intent, summary, retrieved_guideline, actions."
+            )
+
+            gen_cfg = GenerationConfig(response_mime_type="application/json", temperature=0.2)
+            response = model.generate_content(prompt, generation_config=gen_cfg)
+
+            # Different client versions expose the content differently; check common attrs.
+            text = None
+            if hasattr(response, "text"):
+                text = response.text
+            elif hasattr(response, "content"):
+                text = response.content
+            elif isinstance(response, str):
+                text = response
+
+            if not text:
+                raise ValueError("empty response from Gemini")
+
+            try:
+                parsed = json.loads(text)
+                return parsed
+            except json.JSONDecodeError:
+                _SYSTEM_LOGGER.exception("AI_PLANNING_FAILURE")
+                return {"error": "malformed_json", "raw": text}
+
+        except ImportError:
+            _SYSTEM_LOGGER.info("google.generativeai not installed; skipping Gemini call")
+            return {"error": "gemini_unavailable", "retrieved": retrieved}
+        except Exception as exc:
+            _SYSTEM_LOGGER.exception("AI_PLANNING_FAILURE")
+            return {"error": "AI_PLANNING_FAILURE", "detail": str(exc)}
+
+    def _parse_plan(self, raw_plan: str) -> AgentPlan:
+        try:
+            data = json.loads(raw_plan)
+        except json.JSONDecodeError as exc:
+            raise ValueError("Malformed LLM output") from exc
+
+        actions = [
+            AgentAction(
+                type=str(action.get("type", "add_log")),
+                reason=str(action.get("reason", "")),
+                pet_name=action.get("pet_name"),
+                task=dict(action.get("task", {})),
+                log_message=str(action.get("log_message", "")),
+            )
+            for action in data.get("actions", [])
+        ]
+        return AgentPlan(
+            intent=str(data.get("intent", "health_coordination")),
+            summary=str(data.get("summary", "")),
+            actions=actions,
+        )
+
+    def _build_task_from_action(self, action: AgentAction, fallback_pet_id: str) -> Task:
+        return Task(
+            task_id=self._next_task_id(),
+            pet_id=self._resolve_pet_id(action.pet_name) or fallback_pet_id,
+            description=str(action.task.get("description", "Schedule Vet Visit")),
+            category=str(action.task.get("category", "health")),
+            duration_minutes=int(action.task.get("duration_minutes", 20)),
+            priority=str(action.task.get("priority", "high")),
+            frequency=str(action.task.get("frequency", "once")),
+            is_mandatory=bool(action.task.get("is_mandatory", True)),
+        )
+
+    def _resolve_pet_from_input(self, user_input: str) -> Pet:
+        lower_input = user_input.lower()
+        for pet in self.owner.pets.values():
+            if pet.name.lower() in lower_input:
+                return pet
+        if self.owner.pets:
+            return next(iter(self.owner.pets.values()))
+        raise ValueError("No pets are available for care coordination")
+
+    def _resolve_pet_id(self, pet_name: Optional[str]) -> Optional[str]:
+        if not pet_name:
+            return None
+        for pet in self.owner.pets.values():
+            if pet.name.lower() == pet_name.lower():
+                return pet.pet_id
+        return None
+
+    def _next_task_id(self) -> str:
+        existing_ids = [task.task_id for task in self.owner.get_all_tasks(include_completed=True)]
+        max_index = 0
+        for task_id in existing_ids:
+            match = re.search(r"(\d+)$", task_id)
+            if match:
+                max_index = max(max_index, int(match.group(1)))
+        return f"task_{max_index + 1:03d}"
